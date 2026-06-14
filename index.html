@@ -381,6 +381,11 @@ code, pre, kbd, samp { font-family: var(--font-mono); }
   a { color: inherit; }
   mark { background: transparent; }
 
+  /* Never let the page scroll sideways on small screens */
+  html, body { max-width: 100%; overflow-x: hidden; }
+  #root { overflow-x: hidden; }
+  img, svg, video, canvas { max-width: 100%; }
+
   /* Responsive collapse */
   @media (max-width: 1080px) {
     .cta-4col { grid-template-columns: repeat(2, 1fr) !important; }
@@ -395,10 +400,22 @@ code, pre, kbd, samp { font-family: var(--font-mono); }
     .cta-3col { grid-template-columns: 1fr !important; }
     .cta-steps { grid-template-columns: repeat(2, 1fr) !important; gap: 28px 0 !important; }
     .cta-foot { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
+    /* Roomier touch targets + smaller section rhythm on tablets/phones */
+    .cta-section { padding: 64px 0 !important; }
   }
   @media (max-width: 560px) {
     .cta-4col, .cta-5col, .cta-statgrid, .cta-steps, .cta-foot { grid-template-columns: 1fr !important; }
     .cta-steps > div { border-left: none !important; padding-left: 0 !important; }
+    .cta-foot { grid-template-columns: 1fr !important; }
+    /* Tighter page gutters so cards aren't squeezed */
+    .cta-container { padding-left: 16px !important; padding-right: 16px !important; }
+    .cta-section { padding: 48px 0 !important; }
+    /* Hide the secondary nav button so the brand + primary CTA fit one row */
+    .cta-nav-ghost { display: none !important; }
+    /* Let the dense endpoints table scroll horizontally instead of crushing */
+    .cta-wide-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    .cta-wide-table > div { min-width: 540px; }
+    .cta-demo-chrome { flex-wrap: wrap !important; row-gap: 8px; }
   }
 </style>
 </head>
@@ -1579,14 +1596,14 @@ const { Button, Badge, Card, Stat, LiveDot, SeverityTag, Terminal } = DS;
 // ---- Layout primitives ----
 function Container({ children, wide = false, style = {} }) {
   return (
-    <div style={{ width: '100%', maxWidth: wide ? 'var(--maxw-wide)' : 'var(--maxw-content)',
+    <div className="cta-container" style={{ width: '100%', maxWidth: wide ? 'var(--maxw-wide)' : 'var(--maxw-content)',
       margin: '0 auto', padding: '0 24px', ...style }}>{children}</div>
   );
 }
 
 function Section({ children, id, style = {}, divider = true }) {
   return (
-    <section id={id} style={{ padding: '96px 0', borderTop: divider ? '1px solid var(--border-faint)' : 'none', ...style }}>
+    <section id={id} className="cta-section" style={{ padding: '96px 0', borderTop: divider ? '1px solid var(--border-faint)' : 'none', ...style }}>
       {children}
     </section>
   );
@@ -1640,7 +1657,10 @@ function Nav() {
       <Container wide style={{ height: '100%', display: 'flex', alignItems: 'center', gap: 24 }}>
         <a href="#top" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img src={window.__resources.logoMark} alt="" style={{ width: 30, height: 30 }} />
-          <span style={{ font: 'var(--fw-bold) 19px var(--font-display)', color: 'var(--text-primary)', letterSpacing: '1px' }}>PromptWatch</span>
+          <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
+            <span style={{ font: 'var(--fw-bold) 19px var(--font-display)', color: 'var(--text-primary)', letterSpacing: '1px' }}>PromptWatch</span>
+            <span className="cta-brand-by" style={{ font: 'var(--text-mono)', fontSize: 'var(--fs-3xs)', color: 'var(--text-tertiary)', letterSpacing: 'var(--ls-wide)' }}>by Gaurav Patil</span>
+          </span>
         </a>
         <nav style={{ display: 'flex', gap: 4, marginLeft: 12 }} className="cta-navlinks">
           {links.map(([label, href]) => (
@@ -1654,7 +1674,9 @@ function Nav() {
           ))}
         </nav>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Button variant="ghost" size="sm" iconLeft={<window.IconGitHub size={16} />} href="https://github.com/gauravpatil97886/PromptWatch" target="_blank">Self-host</Button>
+          <span className="cta-nav-ghost" style={{ display: 'inline-flex' }}>
+            <Button variant="ghost" size="sm" iconLeft={<window.IconGitHub size={16} />} href="https://github.com/gauravpatil97886/PromptWatch" target="_blank">Self-host</Button>
+          </span>
           <Button variant="primary" size="sm" href="#deploy">Get started</Button>
         </div>
       </Container>
@@ -1988,6 +2010,7 @@ function EndpointsTab() {
   const statusTone = { online: 'signal', idle: 'med', offline: 'neutral' };
   return (
     <DSCard variant="raised" padding="0">
+      <div className="cta-wide-table">
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 0.9fr 1.2fr 1fr', gap: 12, padding: '12px 18px',
         borderBottom: '1px solid var(--border)', font: 'var(--text-mono)', fontSize: 'var(--fs-3xs)', letterSpacing: 'var(--ls-wide)',
         textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
@@ -2009,6 +2032,7 @@ function EndpointsTab() {
             <span style={{ font: 'var(--text-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--text-tertiary)' }}>{e.lastSeen}</span>
           </div>
         ))}
+      </div>
       </div>
     </DSCard>
   );
@@ -2171,7 +2195,7 @@ function Demo() {
           sub="A working console populated with realistic, simulated traffic. Switch tabs, filter threats, and hunt across captured prompts." />
         <DSCard variant="raised" padding="0" style={{ marginTop: 40, position: 'relative', overflow: 'hidden', borderColor: 'var(--border-strong)' }}>
           {/* dashboard chrome bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: '1px solid var(--border)', background: 'var(--surface-inset)' }}>
+          <div className="cta-demo-chrome" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: '1px solid var(--border)', background: 'var(--surface-inset)' }}>
             <img src={window.__resources.logoMark} alt="" style={{ width: 24, height: 24 }} />
             <span style={{ font: 'var(--fw-bold) var(--fs-sm) var(--font-display)', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>PromptWatch Console</span>
             <DSBadge tone="neutral" mono>acme-corp</DSBadge>
@@ -2188,7 +2212,7 @@ function Demo() {
             <DSTabs tabs={tabs} value={tab} onChange={setTab} />
           </div>
           {/* panel */}
-          <div style={{ padding: 18, background: 'var(--bg-base)', minHeight: 420 }}>
+          <div className="cta-demo-panel" style={{ padding: 18, background: 'var(--bg-base)', minHeight: 420 }}>
             <div key={tab} style={{ animation: 'cta-row-in var(--dur-slow) var(--ease-out)' }}>
               {tab === 'overview' && <OverviewTab feed={feed} />}
               {tab === 'endpoints' && <EndpointsTab />}
