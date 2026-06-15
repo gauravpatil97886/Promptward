@@ -129,6 +129,50 @@ def org_token(rotate: bool = typer.Option(False, "--rotate", help="Rotate (inval
 
 
 @app.command()
+def evidence(
+    out: str = typer.Option(None, "-o", "--out", help="Write to this file (default: stdout)"),
+    fmt: str = typer.Option("json", "--format", help="Output format: json | html"),
+    period_days: int = typer.Option(30, help="Reporting window in days (metadata only)"),
+    verify: str = typer.Option(None, "--verify", help="Verify an existing pack file instead of generating"),
+) -> None:
+    """Generate (or verify) a signed compliance evidence pack for auditors.
+
+    `--format html` renders a print-to-PDF document; `--format json` emits the
+    signed, machine-verifiable pack.
+    """
+    from datetime import datetime, timezone
+    from ..server import evidence as _ev
+    from ..server import evidence_report as _report
+
+    settings = get_settings()
+
+    if verify:
+        with open(verify) as f:
+            signed = json.load(f)
+        ok, reason = _ev.verify_pack(signed, settings)
+        style = "green" if ok else "red"
+        console.print(f"[bold {style}]{'VERIFIED' if ok else 'INVALID'}[/] — {reason}")
+        sys.exit(0 if ok else 1)
+
+    now = datetime.now(timezone.utc).isoformat()
+    pack = _ev.build_pack(settings, period_days=period_days, generated_at=now, actor="cli")
+    signed = _ev.sign_pack(pack, settings)
+    blob = _report.render_html(signed) if fmt == "html" else json.dumps(signed, indent=2)
+
+    if out:
+        with open(out, "w") as f:
+            f.write(blob)
+        p = signed["pack"]["posture"]
+        console.print(
+            f"[green]Wrote {fmt} evidence pack[/] → [cyan]{out}[/]\n"
+            f"  Controls: [green]{p['pass']} pass[/] · [yellow]{p['partial']} partial[/] · "
+            f"[red]{p['gap']} gap[/]   sha256=[dim]{signed['manifest']['pack_sha256'][:16]}…[/]"
+        )
+    else:
+        print(blob)
+
+
+@app.command()
 def agents() -> None:
     """List enrolled agents (central server)."""
     from ..server.server_store import ServerStore

@@ -19,6 +19,15 @@
 
 ---
 
+## See it
+
+| Live security dashboard | Signed compliance evidence pack |
+|:--:|:--:|
+| [![Dashboard](screenshot.png)](screenshot.png) | [![Evidence pack](docs/evidence-pack.png)](docs/sample-evidence-pack.html) |
+| Activity, endpoints, threats, tokens, sessions — updated live. | One-click auditor deliverable: control attestation + framework mapping, HMAC-signed. [View the sample →](docs/sample-evidence-pack.html) |
+
+---
+
 ## The problem
 
 Anthropic's admin console, usage logs, and member management exist **only for Claude Team and
@@ -42,7 +51,7 @@ Enterprise plan required.
 | See all AI usage | Live dashboard: activity, endpoints, models, tokens, sessions | Thin agent to central collector to dashboard |
 | Catch risky prompts | Threat detection: injection, secrets, exfiltration | `common/security.py` rule engine, server-enforced |
 | Stop data leaks | Secret and PII/PHI/PCI **redaction before storage** | `redact.py` + `compliance.py`, masked at the agent *and* the collector |
-| Prove compliance | Tamper-evident audit log + violation register + framework mapping | `audit.py` hash chain, `reports.py` |
+| Prove compliance | **Signed, framework-mapped evidence pack** + tamper-evident audit log + violation register | `evidence.py` (HMAC-signed), `audit.py` hash chain, `reports.py` |
 | Run it safely | Per-agent keys, dashboard token, HTTPS-only credentials, retention | `auth.py`, `identity.require_secure`, `prune.py` |
 | Never break Claude | **Fail-open** — agent forwards to Anthropic regardless of Promptward | independent forward path + disk spool |
 
@@ -103,7 +112,27 @@ Built for security, audit, and compliance teams:
 - **Retention and minimization** — keep-N-days plus redaction (GDPR Art. 5).
 - **Consent and disclosure** — monitoring notice at install plus a configurable dashboard banner.
 - **Framework mapping** — EU AI Act, NIST AI RMF, ISO/IEC 42001, SOC 2, GDPR.
+- **Signed evidence packs** — one command produces a self-contained, **HMAC-signed** governance
+  artifact (inventory + violation register + audit verification + per-control attestation mapped
+  to all five frameworks). Render it as JSON for machine verification or as a print-to-PDF HTML
+  document for auditors. Control statuses are derived from **live system state** — the pack can't
+  claim a control that isn't actually on.
 - **Export** — CSV or SIEM webhook for your audit pipeline.
+
+```bash
+pw evidence --format html -o evidence-pack.html   # auditor-ready document
+pw evidence -o pack.json                          # signed, machine-verifiable
+pw evidence --verify pack.json                    # VERIFIED — ok  (detects any edit)
+```
+
+### Why not just use an LLM gateway (e.g. LiteLLM)?
+
+Gateways govern the **applications you build** — apps must route through a managed virtual key.
+Promptward governs the **people using Claude** on their own individual accounts (Claude Code CLI,
+the VS Code extension, SDK apps) — which a gateway never sees. And where gateways paywall audit
+logs and map to no compliance framework, Promptward's **signed, framework-mapped evidence pack and
+tamper-evident audit log are open source**. The two are complementary, not competing: run a gateway
+for your apps and Promptward for your workforce.
 
 ## Quick start
 
@@ -139,7 +168,7 @@ then choose `main` and either `/ (root)` or `/docs`.
 src/promptward/
   common/   config, crypto, security, redact, compliance, storage
   agent/    forwarder, shipper, spool, enroll, service, identity, notifier
-  server/   collector, dashboard, admin, auth, server_store, audit, reports, prune, app
+  server/   collector, dashboard, admin, auth, server_store, audit, reports, evidence, evidence_report, prune, app
   cli/      pw entry point
 deploy/agent/   employee laptop install
 deploy/server/  central server install (compose, env)
@@ -151,7 +180,7 @@ index.html      published overview page (GitHub Pages)
 
 ```bash
 pip install -e ".[dev,server]"
-pytest          # 21 tests
+pytest          # 30 tests
 ruff check src tests
 mypy src
 ```
@@ -159,7 +188,8 @@ mypy src
 ## Documentation
 
 [Architecture](docs/architecture.md) · [Security and threat model](docs/security.md) ·
-[Operations runbook](docs/operations.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+[Operations runbook](docs/operations.md) · [Roadmap](docs/roadmap.md) ·
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 ## Maintainer
 

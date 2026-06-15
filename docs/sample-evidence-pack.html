@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Corp — AI Governance Evidence Pack</title>
+<style>
+  @page { margin: 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+         color: #0f172a; margin: 0; padding: 32px; max-width: 960px; margin: 0 auto;
+         line-height: 1.5; font-size: 13px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 28px 0 10px; padding-bottom: 6px;
+        border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 14px; margin: 0; }
+  .mut { color: #64748b; font-size: 12px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start;
+          border-bottom: 3px solid #2563eb; padding-bottom: 14px; }
+  .brand { color: #2563eb; font-weight: 700; letter-spacing: .04em; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+  .stat { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; }
+  .stat .n { font-size: 24px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #eef2f7;
+           vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: #64748b; }
+  code { font-size: 11px; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+  .badge { font-weight: 700; font-size: 11px; padding: 2px 9px; border-radius: 999px;
+           white-space: nowrap; }
+  .nowrap { white-space: nowrap; }
+  .fw { border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 14px 12px; margin: 12px 0; }
+  .fw-head { display: flex; justify-content: space-between; align-items: center;
+             margin-top: 8px; }
+  .manifest { background: #0f172a; color: #cbd5e1; border-radius: 10px; padding: 14px 16px;
+              font-size: 11px; word-break: break-all; margin-top: 8px; }
+  .manifest b { color: #fff; }
+  footer { margin-top: 30px; color: #94a3b8; font-size: 11px;
+           border-top: 1px solid #e2e8f0; padding-top: 10px; }
+</style></head><body>
+
+<div class="head">
+  <div>
+    <h1>AI Governance Evidence Pack</h1>
+    <div class="mut">Acme Corp · reporting window 30 days</div>
+  </div>
+  <div style="text-align:right">
+    <div class="brand">PROMPTWARD</div>
+    <div class="mut">Generated 2026-06-15T13:04:30<br>by cli</div>
+  </div>
+</div>
+
+<h2>Control posture summary</h2>
+<div class="grid">
+  <div class="stat"><div class="n" style="color:#15803d">9</div>controls PASS</div>
+  <div class="stat"><div class="n" style="color:#b45309">1</div>controls PARTIAL</div>
+  <div class="stat"><div class="n" style="color:#b91c1c">0</div>controls GAP</div>
+  <div class="stat"><div class="n">3</div>flagged interactions</div>
+</div>
+
+<h2>Audit trail integrity</h2>
+<p><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span> &nbsp; Hash chain intact — log has not been altered.
+<span class="mut">(2 recent entries sampled.)</span></p>
+
+<h2>Violation register</h2>
+<table>
+  <tr><td style="width:40%">Total interactions logged</td><td>5</td></tr>
+  <tr><td>Flagged interactions</td><td>3</td></tr>
+  <tr><td>By severity</td><td>Low: 0 · Medium: 1 · High: 2</td></tr>
+  <tr><td>By category</td><td>PII (1), prompt injection (1), credential (1)</td></tr>
+</table>
+
+<h2>Control attestation</h2>
+<table><thead><tr><th>Control</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody><tr><td><b>Inventory of AI use</b><div class='mut'>3 enrolled agent(s) tracked.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>server_store.agents</code></td></tr><tr><td><b>Logging of all AI interactions</b><div class='mut'>5 interaction(s) logged with model, tokens, user &amp; device.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>interactions table</code></td></tr><tr><td><b>Tamper-evident audit trail</b><div class='mut'>Hash chain verified intact.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>audit_log (SHA-256 hash chain)</code></td></tr><tr><td><b>Data minimisation (secret/PII redaction)</b><div class='mut'>redact_secrets=True, redact_pii=True; masked at agent and re-masked at collector (defense-in-depth).</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>redact.py + compliance.py</code></td></tr><tr><td><b>PII / PHI / PCI detection</b><div class='mut'>Email, phone, SSN, payment card (Luhn-validated), IBAN and PHI terms detected.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>compliance.scan</code></td></tr><tr><td><b>Data retention &amp; disposal</b><div class='mut'>retention_days=90 (enforced by prune job).</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>prune.py</code></td></tr><tr><td><b>Encryption of stored prompts/responses</b><div class='mut'>encrypt_logs=True (Fernet AES-128-CBC + HMAC-SHA256).</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>crypto.py</code></td></tr><tr><td><b>Agent↔collector channel security</b><div class='mut'>require_https=True — agent refuses to ship credentials to a non-HTTPS, non-loopback collector.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>identity.require_secure</code></td></tr><tr><td><b>Dashboard access control</b><div class='mut'>Shared dashboard token (constant-time compare, HttpOnly cookie). Per-user RBAC/SSO is on the roadmap (Phase 3).</div></td><td class='nowrap'><span class="badge" style="color:#b45309;background:#fef3c7">PARTIAL</span></td><td class='mut'><code>auth.py</code></td></tr><tr><td><b>Threat &amp; risk monitoring</b><div class='mut'>Every interaction scored for prompt injection, credential leakage, exfiltration intent and off-policy model use; flagged events recorded.</div></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td><td class='mut'><code>security.analyze + compliance.evaluate</code></td></tr></tbody></table>
+
+<h2>Framework mapping</h2>
+<div class='fw'><div class='fw-head'><h3>EU AI Act</h3><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></div><table><thead><tr><th>Clause / control objective</th><th>Mapped control</th><th>Status</th></tr></thead><tbody><tr><td>Art. 12 — record-keeping / logging</td><td class='mut'><code>usage-logging</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 12 — tamper-evident logs</td><td class='mut'><code>audit-trail</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 13 — transparency of AI use</td><td class='mut'><code>inventory</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 15 — accuracy, robustness &amp; monitoring</td><td class='mut'><code>threat-monitoring</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr></tbody></table></div><div class='fw'><div class='fw-head'><h3>NIST AI RMF</h3><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></div><table><thead><tr><th>Clause / control objective</th><th>Mapped control</th><th>Status</th></tr></thead><tbody><tr><td>MAP 1 — inventory of AI use</td><td class='mut'><code>inventory</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>MEASURE 2 — incident &amp; risk logging</td><td class='mut'><code>threat-monitoring</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>MANAGE 4 — monitoring &amp; response</td><td class='mut'><code>usage-logging</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>GOVERN 1 — accountable audit trail</td><td class='mut'><code>audit-trail</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr></tbody></table></div><div class='fw'><div class='fw-head'><h3>ISO/IEC 42001</h3><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></div><table><thead><tr><th>Clause / control objective</th><th>Mapped control</th><th>Status</th></tr></thead><tbody><tr><td>A.6 — AI system operational controls</td><td class='mut'><code>redaction</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>A.8 — data management &amp; minimisation</td><td class='mut'><code>pii-detection</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>A.9 — monitoring &amp; measurement</td><td class='mut'><code>threat-monitoring</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>A.5 — logging &amp; audit</td><td class='mut'><code>audit-trail</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr></tbody></table></div><div class='fw'><div class='fw-head'><h3>SOC 2</h3><span class="badge" style="color:#b45309;background:#fef3c7">PARTIAL</span></div><table><thead><tr><th>Clause / control objective</th><th>Mapped control</th><th>Status</th></tr></thead><tbody><tr><td>CC6.1 — logical access control</td><td class='mut'><code>access-control</code></td><td class='nowrap'><span class="badge" style="color:#b45309;background:#fef3c7">PARTIAL</span></td></tr><tr><td>CC6.7 — data in transit protection</td><td class='mut'><code>channel-security</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>CC7.2 — security event logging</td><td class='mut'><code>usage-logging</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>CC7.3 — tamper-evident audit trail</td><td class='mut'><code>audit-trail</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>A1.2 — retention &amp; disposal</td><td class='mut'><code>retention</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr></tbody></table></div><div class='fw'><div class='fw-head'><h3>GDPR</h3><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></div><table><thead><tr><th>Clause / control objective</th><th>Mapped control</th><th>Status</th></tr></thead><tbody><tr><td>Art. 5(1)(c) — data minimisation</td><td class='mut'><code>redaction</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 5(1)(e) — storage limitation</td><td class='mut'><code>retention</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 32 — security of processing (encryption)</td><td class='mut'><code>encryption-at-rest</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr><tr><td>Art. 30 — records of processing</td><td class='mut'><code>usage-logging</code></td><td class='nowrap'><span class="badge" style="color:#15803d;background:#dcfce7">PASS</span></td></tr></tbody></table></div>
+
+<h2>AI use inventory</h2>
+<table><thead><tr><th>Device</th><th>OS</th><th>User</th><th>Status</th><th>Last seen</th></tr></thead>
+<tbody><tr><td>win-qa-2</td><td>Windows 11</td><td>kim</td><td>active</td><td class='mut'>2026-06-15T13:04:30</td></tr><tr><td>dev-box-7</td><td>Linux 6.8</td><td>sam</td><td>active</td><td class='mut'>2026-06-15T13:04:30</td></tr><tr><td>ana-mbp</td><td>macOS 14</td><td>ana</td><td>active</td><td class='mut'>2026-06-15T13:04:30</td></tr></tbody></table>
+
+<h2>Authenticity manifest</h2>
+<div class="manifest">
+  <div><b>Algorithm:</b> HMAC-SHA256</div>
+  <div><b>Content SHA-256:</b> cbe40ac5614b4a6d42663cc45bad0a33a860f79b33c62163b31fa03222ade435</div>
+  <div><b>Signature:</b> e0aa62c960b50ed98ba6ced994d3d621ee193aca38e454621e88558d539dc091</div>
+  <div class="mut" style="margin-top:6px">Re-verify the machine-readable pack with
+  <code>pw evidence --verify pack.json</code>. Any edit to the JSON invalidates this signature.</div>
+</div>
+
+<footer>Generated by Promptward — self-hosted AI usage governance. This document
+reflects live system state at generation time and is not a substitute for a formal audit.</footer>
+</body></html>

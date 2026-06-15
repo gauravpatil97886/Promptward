@@ -17,12 +17,14 @@ Routes:
     GET   /api/admin/export.csv           CSV export (metadata) for SIEM/audit
 """
 
+from datetime import datetime, timezone
+
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 
 from ..common.config import Settings
 from ..common.storage import Store
-from . import reports
+from . import evidence, evidence_report, reports
 from .audit import AuditLog
 from .server_store import ServerStore
 
@@ -113,6 +115,41 @@ def register_admin(app: FastAPI, settings: Settings) -> None:
             headers={"Content-Disposition": "attachment; filename=pw-interactions.csv"},
         )
 
+    @app.get("/api/admin/evidence-pack")
+    async def evidence_pack(request: Request, period_days: int = 30) -> JSONResponse:
+        """
+        Generate a signed compliance evidence pack: inventory + violation register
+        + audit verification + per-control attestation mapped to EU AI Act / NIST
+        AI RMF / ISO 42001 / SOC 2 / GDPR. The export action is itself audited.
+        """
+        now = datetime.now(timezone.utc).isoformat()
+        pack = evidence.build_pack(settings, period_days=period_days,
+                                   generated_at=now, actor=_actor(request))
+        signed = evidence.sign_pack(pack, settings)
+        audit.record(_actor(request), "evidence.export",
+                     "evidence-pack", f"period_days={period_days}")
+        return JSONResponse(
+            signed,
+            headers={"Content-Disposition": "attachment; filename=promptward-evidence-pack.json"},
+        )
+
+    @app.get("/api/admin/evidence-pack.html", response_class=HTMLResponse)
+    async def evidence_pack_html(request: Request, period_days: int = 30) -> HTMLResponse:
+        """Same evidence pack, rendered as a print-to-PDF HTML document for auditors."""
+        now = datetime.now(timezone.utc).isoformat()
+        pack = evidence.build_pack(settings, period_days=period_days,
+                                   generated_at=now, actor=_actor(request))
+        signed = evidence.sign_pack(pack, settings)
+        audit.record(_actor(request), "evidence.export", "evidence-pack.html",
+                     f"period_days={period_days}")
+        return HTMLResponse(evidence_report.render_html(signed))
+
+    @app.post("/api/admin/evidence-pack/verify")
+    async def evidence_pack_verify(payload: dict) -> dict:
+        """Verify a previously-issued pack's signature + content hash."""
+        ok, reason = evidence.verify_pack(payload, settings)
+        return {"verified": ok, "reason": reason}
+
 
 _ADMIN_HTML = r"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -137,6 +174,10 @@ border-bottom:1px solid var(--bd);font-size:13px}th{color:var(--mut);font-weight
 .pill{padding:2px 8px;border-radius:99px;font-size:11px}
 .s3{background:rgba(239,68,68,.15);color:var(--red)}.s2{background:rgba(245,158,11,.15);color:var(--amb)}
 .s1{background:rgba(59,130,246,.15);color:var(--blue)}.ok{color:var(--grn)}.bad{color:var(--red)}
+.b{font-weight:700;font-size:11px;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.bPASS{background:rgba(34,197,94,.15);color:var(--grn)}
+.bPARTIAL{background:rgba(245,158,11,.15);color:var(--amb)}
+.bGAP{background:rgba(239,68,68,.15);color:var(--red)}
 button.act{background:var(--blue);color:#fff;border:0;border-radius:7px;padding:6px 12px;cursor:pointer}
 a.act{color:var(--blue)}
 .tab{display:none}.tab.on{display:block}
@@ -144,6 +185,7 @@ a.act{color:var(--blue)}
 <header><h1>🛡 Promptward — Admin &amp; Compliance</h1>
 <nav>
 <button class="on" onclick="show('compliance',this)">Compliance</button>
+<button onclick="show('evidence',this)">Evidence pack</button>
 <button onclick="show('agents',this)">Agents</button>
 <button onclick="show('audit',this)">Audit</button>
 <button onclick="show('settings',this)">Settings</button>
@@ -154,6 +196,21 @@ a.act{color:var(--blue)}
   <div class="card"><h3>Violation register (by category)</h3><table id="cats"></table></div>
   <div class="card"><h3>Framework alignment</h3><table id="fw"></table>
     <p class="mut">Export evidence: <a class="act" href="/api/admin/export.csv">interactions.csv</a></p></div>
+</section>
+
+<section id="evidence" class="tab">
+  <div class="card">
+    <h3>Compliance evidence pack</h3>
+    <p class="mut">A signed, self-contained governance artifact mapped to EU AI Act / NIST AI RMF /
+      ISO 42001 / SOC 2 / GDPR. Control statuses below are derived from live system state.</p>
+    <p>
+      <a class="act" href="/api/admin/evidence-pack.html" target="_blank">📄 Open printable report (PDF)</a> &nbsp;
+      <a class="act" href="/api/admin/evidence-pack" download>⬇ Download signed JSON</a>
+    </p>
+    <div class="grid" id="ev-kpis" style="margin-top:14px"></div>
+  </div>
+  <div class="card"><h3>Control attestation</h3><table id="ev-controls"></table></div>
+  <div class="card"><h3>Framework coverage</h3><table id="ev-fw"></table></div>
 </section>
 
 <section id="agents" class="tab">
@@ -192,6 +249,17 @@ async function load(id){
       (Object.entries(c.by_category).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')||'<tr><td class=mut colspan=2>No violations recorded</td></tr>');
     $('#fw').innerHTML='<tr><th>Framework</th><th>Controls covered</th></tr>'+
       Object.entries(c.frameworks).map(([k,v])=>`<tr><td>${k}</td><td class=mut>${v.join(' · ')}</td></tr>`).join('');
+  }
+  if(id==='evidence'){const e=await j('/api/admin/evidence-pack');const p=e.pack;const po=p.posture;
+    $('#ev-kpis').innerHTML=`<div class="kpi"><span class="mut">Controls PASS</span><b class="ok">${po.pass}</b></div>
+      <div class="kpi"><span class="mut">PARTIAL</span><b style="color:var(--amb)">${po.partial}</b></div>
+      <div class="kpi"><span class="mut">GAP</span><b class="bad">${po.gap}</b></div>
+      <div class="kpi"><span class="mut">Audit chain</span><b class="${p.audit_trail.verified?'ok':'bad'}" style="font-size:15px">${p.audit_trail.verified?'verified ✓':'BROKEN'}</b></div>`;
+    const bd=s=>`<span class="b b${s}">${s}</span>`;
+    $('#ev-controls').innerHTML='<tr><th>Control</th><th>Status</th><th>Detail</th></tr>'+
+      p.controls.map(c=>`<tr><td><b>${c.title}</b></td><td>${bd(c.status)}</td><td class=mut>${c.detail}</td></tr>`).join('');
+    $('#ev-fw').innerHTML='<tr><th>Framework</th><th>Coverage</th><th>Clauses</th></tr>'+
+      Object.entries(p.frameworks).map(([k,v])=>`<tr><td>${k}</td><td>${bd(v.coverage)}</td><td class=mut>${v.clauses.map(c=>c.clause+' '+bd(c.status)).join('<br>')}</td></tr>`).join('');
   }
   if(id==='agents'){const a=await j('/api/admin/agents');
     $('#agents-t').innerHTML='<tr><th>Agent</th><th>Device</th><th>OS</th><th>Status</th><th>Last seen</th><th></th></tr>'+
