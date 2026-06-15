@@ -2254,9 +2254,9 @@ function Features() {
     { icon: <window.IconScan size={20} />, title: 'DLP scanning', body: 'PII / PHI / PCI detection, including Luhn-validated card numbers, before data is ever stored.' },
     { icon: <window.IconKey size={20} />, title: 'Secret redaction', body: 'API keys, tokens, and credentials are masked on the machine — they never reach the collector.' },
     { icon: <window.IconFileText size={20} />, title: 'AUP policy packs', body: 'Ship acceptable-use policy packs and get alerted the moment usage drifts outside them.' },
-    { icon: <window.IconCpu size={20} />, title: 'Model governance', body: 'Allow / deny specific models per team. Off-list requests are logged and downgraded by policy.' },
+    { icon: <window.IconCpu size={20} />, title: 'Model governance', body: 'Allow or deny specific Claude models per team. Off-policy and denied models are flagged as soon as they are used.' },
     { icon: <window.IconLock size={20} />, title: 'Tamper-evident audit log', body: 'Every event chained with SHA-256 so the audit trail can be proven intact end to end.' },
-    { icon: <window.IconDatabase size={20} />, title: 'Encryption at rest', body: 'AES-256 at rest with per-agent keys, so a single compromised host can’t unlock the fleet.' },
+    { icon: <window.IconDatabase size={20} />, title: 'Encryption at rest', body: 'Fernet (AES-128-CBC + HMAC-SHA256) at rest, with a per-host key (mode 0600) that never leaves the machine that wrote it.' },
     { icon: <window.IconGitBranch size={20} />, title: 'SIEM / CSV export', body: 'Stream events to Splunk, Elastic, or your SIEM — or export CSV for ad-hoc investigations.' },
   ];
   return (
@@ -2309,6 +2309,12 @@ function Compliance() {
             </C2>
           ))}
         </div>
+        <C2 variant="inset" style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', flexWrap: 'wrap' }}>
+          <window.IconFileText size={20} style={{ color: 'var(--accent-bright)', flexShrink: 0 }} />
+          <p style={{ font: 'var(--text-body-sm)', color: 'var(--text-secondary)', flex: 1, minWidth: 260, lineHeight: 'var(--lh-relaxed)' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>Signed evidence packs.</strong> Run <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)', color: 'var(--accent-bright)', background: 'var(--surface-inset)', border: '1px solid var(--border-faint)', borderRadius: 'var(--radius-xs)', padding: '1px 6px' }}>pw evidence</span> to export a cryptographically signed, tamper-verifiable report — machine-readable JSON or a print-to-PDF document — scored pass / partial / gap across every control.
+          </p>
+        </C2>
       </Ct>
     </Sn>
   );
